@@ -12,6 +12,8 @@ class CDCLSolver:
         self.enable_subsumption = enable_subsumption
         self.enable_forgetting = enable_forgetting
         self.learned_clauses = []  # List to store learned clauses
+        self.unsat_proof = []  # List to store unsatisfiability proof
+
 
     def add_clause(self, clause):
         self.solver.add_clause(clause)
@@ -25,7 +27,7 @@ class CDCLSolver:
             if result == True:
                 return True, self.solver.get_model()
             elif result == False:
-                return False, self.generate_proof()  # Return the generated proof
+                return False, self.unsat_proof  # Return the unsatisfiability proof
             else:
                 conflict = self.propagate_watched_literals()
                 if conflict:
@@ -146,13 +148,24 @@ def solve_sat_from_file(cnf_file_path, enable_cnf_transformation=False, enable_s
         return "UNSAT", model_or_proof
 
 def solve_sat_from_text(cnf_text, enable_cnf_transformation=False, enable_subsumption=False, enable_forgetting=False):
-    cnf_clauses = [list(map(int, line.split())) for line in cnf_text.split('\n') if line.strip()]
-    if not all(len(clause) == 1 or len(clause) > 1 and clause[-1] == 0 for clause in cnf_clauses):
+    # Check if the input contains non-integer values
+    try:
+        cnf_clauses = [list(map(int, line.split())) for line in cnf_text.split('\n') if line.strip()]
+    except ValueError:
+        QMessageBox.warning(None, "Invalid Input", "Please enter only integer values separated by spaces or newlines.")
+        return None, None
+
+    # Filter out clauses that contain only zeros
+    cnf_clauses = [clause for clause in cnf_clauses if any(lit != 0 for lit in clause)]
+
+    # Check if the input is in CNF form
+    if not all(len(clause) == 1 or (len(clause) > 1 and clause[-1] == 0) for clause in cnf_clauses):
         # Input is not in CNF form, convert to CNF
         cnf_clauses = to_cnf(cnf_clauses)
         # Show the converted CNF in a message box
         converted_text = '\n'.join(' '.join(map(str, clause)) for clause in cnf_clauses)
         QMessageBox.information(None, "Converted to CNF", "The input has been converted to CNF:\n\n" + converted_text)
+
     solver = CDCLSolver(enable_cnf_transformation, enable_subsumption, enable_forgetting)
     for clause in cnf_clauses:
         solver.add_clause(clause)
@@ -161,6 +174,7 @@ def solve_sat_from_text(cnf_text, enable_cnf_transformation=False, enable_subsum
         return "SAT", model_or_proof
     else:
         return "UNSAT", model_or_proof
+
 
 def solve_sat(enable_cnf_transformation=False, enable_subsumption=False, enable_forgetting=False):
     app = QApplication([])
@@ -219,13 +233,16 @@ def main():
                 QMessageBox.information(None, "Error", "No file selected.")
         elif input_method == "Text":
             cnf_text, ok = QInputDialog.getMultiLineText(None, "Enter CNF Formula", "Enter CNF formula to convert:")
-            if ok and cnf_text.strip():  # Ensure non-empty input
-                result, model_or_proof = solve_sat_from_text(cnf_text, enable_cnf_transformation=True)
-                if result == "SAT":
-                    QMessageBox.information(None, "Satisfiable with model", str(model_or_proof))
+            if ok:
+                if not cnf_text.strip():  # Check if input is empty
+                    QMessageBox.warning(None, "Warning", "Please input a clause to convert or there is no input.")
                 else:
-                    QMessageBox.information(None, "The CNF is Unsatisfiable", str(model_or_proof))
-            elif ok:
+                    result, model_or_proof = solve_sat_from_text(cnf_text, enable_cnf_transformation=True)
+                    if result == "SAT":
+                        QMessageBox.information(None, "Satisfiable with model", str(model_or_proof))
+                    elif result == "UNSAT":
+                        QMessageBox.information(None, "The CNF is Unsatisfiable", str(model_or_proof))
+            else:
                 QMessageBox.information(None, "Error", "No CNF formula entered.")
 
     app.exec_()
