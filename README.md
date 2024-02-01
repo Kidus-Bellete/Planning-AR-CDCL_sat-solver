@@ -90,6 +90,10 @@ The solver will output whether the formula is satisfiable along with the model o
 ```
 ## GUI Integration
 The `main()` function creates a graphical user interface using PyQt5. It presents options for inputting CNF formulas via file selection or text input. The solver then processes the input and displays the result in message boxes. The GUI remains active until the user closes the input dialog.
+```python
+def main():
+    app = QApplication([])
+```
 
 ## Running the Program
 To run the program, execute the script. The GUI will prompt you to choose the input method and provide the necessary input. The solver will then process the input and display the result accordingly.
