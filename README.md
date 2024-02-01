@@ -55,11 +55,13 @@ The CDCL solver implements the following features:
 
 1. Ensure you have Python 3.x installed on your system.
 2. Install project dependencies using pip:
+3. PySAT
+4. PyQt5
 
-## Libraries Used
-- **PySAT**: PySAT is a Python library for Boolean satisfiability (SAT) solving. It provides interfaces to various SAT solvers, including Glucose4, which is used in this project.
-- **PyQt5**: PyQt5 is a set of Python bindings for the Qt application framework. It is used for creating the graphical user interface (GUI) for interacting with the SAT solver.
-
+Install project dependencies using pip:
+```bash
+pip install pysat
+```
 ## CDCLSolver Class
 
 The `CDCLSolver` class implements the CDCL algorithm for SAT solving. It utilizes the Glucose4 solver for the underlying SAT solving process. Key functionalities of this class include:
