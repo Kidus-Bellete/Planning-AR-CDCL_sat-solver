@@ -86,7 +86,7 @@ The `solve_sat()` function provides an interface for users to interact with the 
 ```bash
 #Example
 To solve a SAT problem, provide a CNF file or CNF text input through the GUI.
-The solver will output whether the formula is satisfiable along with the model (if satisfiable) or the proof (if unsatisfiable).
+The solver will output whether the formula is satisfiable along with the model or the proof if unsatisfiable.
 ```
 ## GUI Integration
 The `main()` function creates a graphical user interface using PyQt5. It presents options for inputting CNF formulas via file selection or text input. The solver then processes the input and displays the result in message boxes. The GUI remains active until the user closes the input dialog.
